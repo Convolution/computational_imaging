@@ -31,6 +31,8 @@ from flare_removal.python import losses
 from flare_removal.python import models
 from flare_removal.python import synthesis
 
+import wandb
+
 
 flags.DEFINE_string(
     'train_dir', '/tmp/train',
@@ -62,6 +64,8 @@ flags.DEFINE_float(
 flags.DEFINE_float('flare_loss_weight', 1.0,
                    'Weight added on the flare loss (scene loss is 1).')
 flags.DEFINE_integer('training_res', 512, 'Training resolution.')
+flags.DEFINE_integer('flare_res_h', 1008, 'Height of flare image')
+flags.DEFINE_integer('flare_res_w', 752, 'Width of flare image')
 FLAGS = flags.FLAGS
 
 
@@ -81,10 +85,24 @@ def train_step(model, scene, flare, loss_fn, optimizer):
   grads = tape.gradient(loss_value, model.trainable_weights)
   grads, _ = tf.clip_by_global_norm(grads, 5.0)
   optimizer.apply_gradients(zip(grads, model.trainable_weights))
+
   return loss_value, summary
 
 
 def main(_):
+  wandb.login()
+  wandb.init(
+     project="computational_imaging_project",
+     name="David",
+     config={
+         "batch_size": FLAGS.batch_size,
+         "epochs": FLAGS.epochs,
+         "model": FLAGS.model,
+         "loss": FLAGS.loss,
+         "learning_rate": FLAGS.learning_rate
+     })
+
+
   train_dir = FLAGS.train_dir
   assert train_dir, 'Flag --train_dir must not be empty.'
   summary_dir = os.path.join(train_dir, 'summary')
@@ -92,12 +110,13 @@ def main(_):
 
   # Load data.
   scenes = data_provider.get_scene_dataset(
-      FLAGS.scene_dir, FLAGS.data_source, FLAGS.batch_size, repeat=FLAGS.epochs)
+      FLAGS.scene_dir, FLAGS.data_source, FLAGS.batch_size,
+      repeat=FLAGS.epochs, input_shape=(FLAGS.training_res, FLAGS.training_res, 3))
   flares = data_provider.get_flare_dataset(FLAGS.flare_dir, FLAGS.data_source,
-                                           FLAGS.batch_size)
+                                           FLAGS.batch_size, input_shape=(FLAGS.flare_res_w, FLAGS.flare_res_h, 3))
 
   # Make a model.
-  model = models.build_model(FLAGS.model, FLAGS.batch_size)
+  model = models.build_model(FLAGS.model, FLAGS.batch_size, FLAGS.training_res)
   optimizer = tf.keras.optimizers.Adam(learning_rate=FLAGS.learning_rate)
   loss_fn = losses.get_loss(FLAGS.loss)
 
@@ -129,7 +148,16 @@ def main(_):
 
   step_time_metric = tf.keras.metrics.Mean('step_time')
   step_start_time = time.time()
+  i=1
+  e=0
+  wandb.log({"epoch": e})
+  epoch_len = len([f for f in os.listdir(FLAGS.scene_dir)]) // FLAGS.batch_size
+
   for scene, flare in tf.data.Dataset.zip((scenes, flares)):
+    if i % epoch_len == 0:
+        e += 1
+        wandb.log({"epoch": e})
+
     # Perform one training step.
     loss_value, summary = train_step(model, scene, flare, loss_fn, optimizer)
 
@@ -163,6 +191,10 @@ def main(_):
     step_time_metric.update_state(step_end_time - step_start_time)
     step_start_time = step_end_time
 
+    wandb.log({"loss": loss_value.numpy(),
+               "step": int(ckpt.step.numpy()),
+               "step_time": step_time_metric.result()})
+    i+=1
   ckpt.training_finished.assign(True)
   ckpt_mgr.save()
   logging.info('Done!')

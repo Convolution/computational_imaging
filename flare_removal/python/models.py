@@ -19,11 +19,11 @@ from flare_removal.python import u_net
 from flare_removal.python import vgg
 
 
-def build_model(model_type, batch_size):
+def build_model(model_type, batch_size, res):
   """Returns a Keras model specified by name."""
   if model_type == 'unet':
     return u_net.get_model(
-        input_shape=(512, 512, 3),
+        input_shape=(res, res, 3),
         scales=4,
         bottleneck_depth=1024,
         bottleneck_layers=2)

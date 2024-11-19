@@ -62,6 +62,8 @@ flags.DEFINE_float('flare_loss_weight', 1.0,
                    'Weight added on the flare loss (scene loss is 1).')
 flags.DEFINE_integer('training_res', 512,
                      'Image resolution at which the network is trained.')
+flags.DEFINE_integer('flare_res_h', 1008, 'Height of flare image')
+flags.DEFINE_integer('flare_res_w', 752, 'Width of flare image')
 FLAGS = flags.FLAGS
 
 
@@ -74,12 +76,13 @@ def main(_):
 
   # Load data.
   scenes = data_provider.get_scene_dataset(
-      FLAGS.scene_dir, FLAGS.data_source, FLAGS.batch_size, repeat=0)
+      FLAGS.scene_dir, FLAGS.data_source, FLAGS.batch_size, repeat=0,
+      input_shape=(FLAGS.training_res, FLAGS.training_res, 3))
   flares = data_provider.get_flare_dataset(FLAGS.flare_dir, FLAGS.data_source,
-                                           FLAGS.batch_size)
+                                           FLAGS.batch_size, input_shape=(FLAGS.flare_res_w, FLAGS.flare_res_h, 3))
 
   # Make a model.
-  model = models.build_model(FLAGS.model, FLAGS.batch_size)
+  model = models.build_model(FLAGS.model, FLAGS.batch_size, FLAGS.training_res)
   loss_fn = losses.get_loss(FLAGS.loss)
 
   ckpt = tf.train.Checkpoint(
