@@ -1,0 +1,11 @@
+flare_removal/training
+.idea/
+wandb
+flare_free/data/
+flare_free/downsampled_subset/
+flare_free/downsampled_test/
+flare_free/downsampled_train/
+flare_free/downsampled_val/
+flare_removal/eval/
+lens-flare/combined/
+lens-flare/downsampled_flares
