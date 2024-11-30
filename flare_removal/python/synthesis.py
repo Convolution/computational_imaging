@@ -163,3 +163,37 @@ def run_step(scene,
                             axis=2)
 
   return loss_value, image_summary
+
+def run_test(scene,
+             flare,
+             model,
+             loss_fn,
+             noise = 0.0,
+             flare_max_gain = 10.0,
+             flare_loss_weight = 0.0,
+             training_res = 512):
+  """Executes a forward step."""
+  # scene, flare, combined, gamma = add_flare(
+  #     scene,
+  #     flare,
+  #     flare_max_gain=flare_max_gain,
+  #     noise=noise,
+  #     training_res=training_res)
+
+  combined = flare
+  pred_scene = model(combined)
+  pred_flare = utils.remove_flare(combined, pred_scene, gamma)
+
+  flare_mask = utils.get_highlight_mask(flare)
+  # Fill the saturation region with the ground truth, so that no L1/L2 loss
+  # and better for perceptual loss since it matches the surrounding scenes.
+  masked_scene = pred_scene * (1 - flare_mask) + scene * flare_mask
+  loss_value = loss_fn(scene, masked_scene)
+  if flare_loss_weight > 0:
+    masked_flare = pred_flare * (1 - flare_mask) + flare * flare_mask
+    loss_value += flare_loss_weight * loss_fn(flare, masked_flare)
+
+  image_summary = tf.concat([combined, pred_scene, scene, pred_flare, flare],
+                            axis=2)
+
+  return loss_value, image_summary

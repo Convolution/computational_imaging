@@ -1,10 +1,12 @@
-srun -p csc2529 -c 8 --nodelist=coral01 --gres gpu:1 --pty python3 -m flare_removal.python.train \
---train_dir=flare_removal/training/logs \
---scene_dir=flare_free/downsampled_train \
---flare_dir=lens-flare/downsampled_flares \
---epochs=100 \
+srun -p csc2529 --nodelist squid04 -c 2 --gres gpu:1 --pty python3 -m flare_removal.python.train \
+--train_dir=flare_removal/unet_3plus_entire_data/logs \
+--scene_dir=flare_free/downsampled_data_v2 \
+--flare_dir=lens-flare/downsampled_flares_v2 \
+--epochs=200 \
 --batch_size=2 \
 --learning_rate=1e-4 \
---training_res=256 \
---flare_res_h=402 \
---flare_res_w=300
+--training_res=224 \
+--flare_res_h=353 \
+--flare_res_w=263 \
+--model=unet_3plus_2d \
+--exp_name=_unet_3plus_entire_data

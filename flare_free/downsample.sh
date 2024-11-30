@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Set the input and output directories
-img_format="jpg"
+img_format="png"
 input_dir="data"
 output_dir="downsampled_data"
-res=256
+res=224
 
 # Create the output directory if it doesn't exist
 mkdir -p "$output_dir"

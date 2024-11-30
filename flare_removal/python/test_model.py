@@ -115,7 +115,7 @@ def main(_):
         total_ssim = 0.0
         batch_counter = 0
         for scene, flare in tf.data.Dataset.zip((scenes, flares)):
-            loss_value, summary = synthesis.run_step(
+            loss_value, summary = synthesis.run_test(
                 scene,
                 flare,
                 model,

@@ -145,13 +145,13 @@ def process_one_image(model, image_path, out_dir, separate_out_dirs):
   if min(h, w) >= 2048:
     input_image = center_crop(input_f32, 2048, 2048)[None, Ellipsis]
     input_low = tf.image.resize(
-        input_image, [512, 512], method=tf.image.ResizeMethod.AREA)
+        input_image, [224, 224], method=tf.image.ResizeMethod.AREA)
     pred_scene_low = tf.clip_by_value(model(input_low), 0.0, 1.0)
     pred_flare_low = utils.remove_flare(input_low, pred_scene_low)
     pred_flare = tf.image.resize(pred_flare_low, [2048, 2048], antialias=True)
     pred_scene = utils.remove_flare(input_image, pred_flare)
   else:
-    input_image = center_crop(input_f32, 512, 512)[None, Ellipsis]
+    input_image = center_crop(input_f32, 224, 224)[None, Ellipsis]
     input_image = tf.concat([input_image] * FLAGS.batch_size, axis=0)
     pred_scene = tf.clip_by_value(model(input_image), 0.0, 1.0)
     pred_flare = utils.remove_flare(input_image, pred_scene)
@@ -185,7 +185,7 @@ def load_model(path,
   except (ImportError, IOError):
     print(f'Didn\'t find SavedModel at "{path}". '
           'Trying latest checkpoint next.')
-  model = models.build_model(model_type, batch_size)
+  model = models.build_model(model_type, batch_size, res=224)
   ckpt = tf.train.Checkpoint(model=model)
   ckpt_path = tf.train.latest_checkpoint(path) or path
   ckpt.restore(ckpt_path).assert_existing_objects_matched()

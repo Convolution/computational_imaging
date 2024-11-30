@@ -3,9 +3,9 @@
 # Set the input and output directories
 img_format="png"
 input_dir="combined"
-output_dir="downsampled_flares"
-res_h=402
-res_w=300
+output_dir="downsampled_flares_v2"
+res_h=353
+res_w=263
 
 # Create the output directory if it doesn't exist
 mkdir -p "$output_dir"
