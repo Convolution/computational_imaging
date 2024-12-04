@@ -22,6 +22,6 @@ Evaluating model (optional - if there is a separate evaluation data):
 
 Test model to produce visual and qualitative results:
 1) In google-research specify in test_flare_remove.sh:
-    a) for the commands starting with srun: ckpt (path to logs dir of trained model, model (model type), input_dir (path to downsampled input test dir, once for real and once for synthetic), out_dir (path where results are saved).
-    b) for the commands starting with python3: gt_dir (path to ground truth images), blended_dir (path to blended images dir) and out_dir (output path of the text file with metrics).
+  a) for the commands starting with srun: ckpt (path to logs dir of trained model, model (model type), input_dir (path to downsampled input test dir, once for real and once for synthetic), out_dir (path where results are saved).
+  b) for the commands starting with python3: gt_dir (path to ground truth images), blended_dir (path to blended images dir) and out_dir (output path of the text file with metrics).
 2) Run test_flare_remove.sh.
