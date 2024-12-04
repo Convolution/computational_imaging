@@ -1,12 +1,12 @@
 srun -p csc2529 --nodelist squid04 -c 2 --gres gpu:1 --pty python3 -m flare_removal.python.train \
---train_dir=flare_removal/unet_3plus_entire_data/logs \
+--train_dir=flare_removal/trained_models/swin_unet_entire_data/logs \
 --scene_dir=flare_free/downsampled_data_v2 \
 --flare_dir=lens-flare/downsampled_flares_v2 \
---epochs=200 \
+--epochs=150 \
 --batch_size=2 \
 --learning_rate=1e-4 \
 --training_res=224 \
 --flare_res_h=353 \
 --flare_res_w=263 \
---model=unet_3plus_2d \
---exp_name=_unet_3plus_entire_data
+--model=swin_unet_2d \
+--exp_name=_swin_unet_entire_data

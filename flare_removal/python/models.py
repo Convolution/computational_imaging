@@ -30,8 +30,7 @@ def build_model(model_type, batch_size, res):
             batch_norm=True,
             pool='max',
             unpool=False,
-            deep_supervision=False,
-            #backbone='EfficientNetB3',
+            #deep_supervision=True,
             weights='imagenet',
             name='unet3plus')
 

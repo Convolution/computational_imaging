@@ -14,10 +14,14 @@ Model training:
 1) Go to google-research and specify in train_script.sh train_dir (where to save logs), scene_dir (where to get entire downsampled data), flare_dir (where to get entire downsampled flares), epochs=200, training_res=224, flare_res_h=353, flare_res_w=263, model (name of the model you are running) and exp_name (_<name of the experiment>).
 2) Run train_script.sh
 
-Evaluating model (generate mean PSNR and SSIM):
+
+Evaluating model (optional - if there is a separate evaluation data):
 1) After model finished training go to google-research and specify in evaluation_script.sh eval_dir (where to save results), train_dir (logs dir of the trained model), scene_dir (path to downsampled ground_truth test dir, once for real and once for synthetic), training_res=224, flare_res_h=353, flare_res_w=263, model (name of the model type you are evaluating).
 2) Run evaluation_script.sh.
 
-Evaluate visual results of the model:
-1) In google-research specify in test_flare_remove.sh ckpt (path to logs dir of trained model, model (model type), input_dir (path to downsampled input test dir, once for real and once for synthetic), out_dir (path where results are saved).
+
+Test model to produce visual and qualitative results:
+1) In google-research specify in test_flare_remove.sh:
+	a) for the commands starting with srun: ckpt (path to logs dir of trained model, model (model type), input_dir (path to downsampled input test dir, once for real and once for synthetic), out_dir (path where results are saved).
+	b) for the commands starting with python3: gt_dir (path to ground truth images), blended_dir (path to blended images dir) and out_dir (output path of the text file with metrics).
 2) Run test_flare_remove.sh.
