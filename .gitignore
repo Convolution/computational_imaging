@@ -1,6 +1,5 @@
 flare_removal/training
 flare_removal/python/remove_flare_224.py
-flare_removal/python/calculate_metrics.py
 .idea/
 wandb
 flare_free/data/
