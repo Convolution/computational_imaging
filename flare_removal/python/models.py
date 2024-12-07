@@ -18,11 +18,25 @@
 from flare_removal.python import u_net
 from flare_removal.python import vgg
 from keras_unet_collection.models import swin_unet_2d, unet_3plus_2d
+from keras_unet_collection import base, utils
+from flare_removal.python.ViT import ViT, ViTWithDecoder
+from flare_removal.python.pretrain_ViT import Pretrain_ViT
+from flare_removal.python.u_net_pp import get_model as unet_pp
 
 
 def build_model(model_type, batch_size, res):
     """Returns a Keras model specified by name."""
-    if model_type == 'unet_3plus_2d':
+    if model_type == 'unet':
+        return u_net.get_model(
+            input_shape=(res, res, 3),
+            scales=4,
+            bottleneck_depth=1024,
+            bottleneck_layers=2)
+      
+    elif model_type == 'unet_pp':
+        return unet_pp(input_shape=(res, res, 3))
+      
+    elif model_type == 'unet_3plus_2d':
         return unet_3plus_2d(
             (res, res, 3),
             n_labels=3,
@@ -34,25 +48,25 @@ def build_model(model_type, batch_size, res):
             weights='imagenet',
             name='unet3plus')
 
-    if model_type == 'swin_unet_2d':
-        return swin_unet_2d(
-            input_size=(res, res, 3),
-            filter_num_begin=64,
-            n_labels=3,
-            depth=4,
-            stack_num_down=2,
-            stack_num_up=2,
-            patch_size=(2, 2),
-            num_heads=[4, 8, 8, 16],
-            window_size=[4, 2, 2, 2],
-            num_mlp=512)
+    elif model_type == 'TransUNET':
+        return models.transunet_2d((res, res, 3), filter_num=[64, 128, 256, 512], n_labels=3, stack_num_down=2, stack_num_up=2,
+                                        embed_dim=512, num_mlp=256, num_heads=6, num_transformer=6,
+                                        activation='ReLU', mlp_activation='GELU', output_activation='Sigmoid',
+                                        batch_norm=True, pool=True, unpool='bilinear', name='transunet')
 
-    if model_type == 'unet':
-        return u_net.get_model(
-            input_shape=(res, res, 3),
-            scales=4,
-            bottleneck_depth=1024,
-            bottleneck_layers=2)
+    elif model_type == 'vit':
+      return Pretrain_ViT(
+          image_size=224,
+          patch_size=16,
+          encoder_dim=64,
+          decoder_dim=128,
+          depth=6,
+          heads=4,
+          mlp_dim=128,
+          dropout=0.1,
+          decoder_depth=4
+      )
+
     elif model_type == 'can':
         return vgg.build_can(
             input_shape=(512, 512, 3), conv_channels=64, out_channels=3)
